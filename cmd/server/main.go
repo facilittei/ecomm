@@ -1,20 +1,16 @@
 package main
 
 import (
-	"fmt"
+	"github.com/facilittei/ecomm/internal/config"
+	"github.com/facilittei/ecomm/internal/servers"
 	"log"
-	"net/http"
 )
 
 func main() {
-	mux := http.NewServeMux()
+	cfg := config.NewConfig()
 
-	mux.HandleFunc("/v1/healthcheck", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintln(w, "Available")
-	})
-
-	log.Println("Application is up and running")
-	if err := http.ListenAndServe(":4000", mux); err != nil {
-		log.Fatal(err)
+	app := servers.NewApp(cfg)
+	if err := app.Listen(); err != nil {
+		log.Fatalf("could not start server %v", err)
 	}
 }

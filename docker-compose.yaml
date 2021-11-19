@@ -1,0 +1,10 @@
+version: "3"
+
+services:
+  ecomm:
+    build: .
+    container_name: ecomm
+    environment:
+      PORT: "80"
+    ports:
+      - "4000:80"
