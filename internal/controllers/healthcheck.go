@@ -1,11 +1,11 @@
-package routes
+package controllers
 
 import (
 	"github.com/facilittei/ecomm/internal/services"
 	"github.com/gofiber/fiber/v2"
 )
 
-// Healthcheck routes resource-related requests
+// Healthcheck resource-related requests
 type Healthcheck struct {
 	HealthcheckSrv *services.Healthcheck
 }

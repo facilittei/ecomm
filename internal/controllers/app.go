@@ -1,11 +1,11 @@
-package servers
+package controllers
 
 import (
 	"errors"
 	"fmt"
 	"github.com/facilittei/ecomm/internal/config"
-	"github.com/facilittei/ecomm/internal/routes"
 	"github.com/facilittei/ecomm/internal/services"
+	payments "github.com/facilittei/ecomm/internal/services/payments"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -26,10 +26,14 @@ func NewApp(cfg config.Config) *App {
 // Routes register endpoints
 func (app *App) Routes() *fiber.App {
 	healthcheckSrv := services.NewHealthcheck()
-	healthcheckRt := routes.NewHealthcheck(healthcheckSrv)
+	healthcheckCtrl := NewHealthcheck(healthcheckSrv)
+
+	paymentSrv := payments.NewJuno()
+	paymentCtrl := NewPayment(paymentSrv)
 
 	v1 := app.Router.Group("/v1")
-	v1.Get("/healthcheck", healthcheckRt.Index)
+	v1.Get("/healthcheck", healthcheckCtrl.Index)
+	v1.Post("/payments/charge", paymentCtrl.Charge)
 
 	return app.Router
 }

@@ -1,4 +1,4 @@
-package servers
+package controllers
 
 import (
 	"github.com/facilittei/ecomm/internal/config"
@@ -6,13 +6,6 @@ import (
 	"net/http"
 	"testing"
 )
-
-func TestAppWithoutRouterInstance(t *testing.T) {
-	app := &App{}
-	if err := app.Listen(); err == nil {
-		t.Error("should return error when there isn't a router instantiated")
-	}
-}
 
 func TestHealthcheckEndpoint(t *testing.T) {
 	app := NewApp(config.Config{Port: "80"}).Routes()
