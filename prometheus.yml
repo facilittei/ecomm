@@ -9,7 +9,7 @@ scrape_configs:
     scrape_interval: 5s
     static_configs:
       - targets: [ 'localhost:9090' ]
-  - job_name: 'ecomm'
+  - job_name: ecomm
     scrape_interval: 5s
     static_configs:
-      - targets: [ 'host.docker.internal:4000' ]
+      - targets: [ ecomm:80 ]
