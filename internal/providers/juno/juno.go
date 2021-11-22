@@ -1,4 +1,4 @@
-package payments
+package providers
 
 import communications "github.com/facilittei/ecomm/internal/communications/http"
 

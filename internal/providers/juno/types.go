@@ -1,4 +1,4 @@
-package payments
+package providers
 
 // JunoAuthenticateRequest makes a request to authorize the application
 // with credentials provided by the payment gateway
