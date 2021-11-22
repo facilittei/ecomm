@@ -3,6 +3,7 @@ package controllers
 import (
 	"errors"
 	"fmt"
+	"github.com/ansrivas/fiberprometheus/v2"
 	"github.com/facilittei/ecomm/internal/config"
 	"github.com/facilittei/ecomm/internal/services"
 	payments "github.com/facilittei/ecomm/internal/services/payments"
@@ -34,6 +35,10 @@ func (app *App) Routes() *fiber.App {
 	v1 := app.Router.Group("/v1")
 	v1.Get("/healthcheck", healthcheckCtrl.Index)
 	v1.Post("/payments/charge", paymentCtrl.Charge)
+
+	prometheus := fiberprometheus.New("ecomm")
+	prometheus.RegisterAt(app.Router, "/metrics")
+	app.Router.Use(prometheus.Middleware)
 
 	return app.Router
 }
