@@ -4,7 +4,7 @@ package services
 type Juno struct{}
 
 // NewJuno creates an instance of Juno
-func NewJuno() Payment {
+func NewJuno() *Juno {
 	return &Juno{}
 }
 

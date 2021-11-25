@@ -1,20 +1,35 @@
 package controllers
 
 import (
-	"github.com/facilittei/ecomm/internal/config"
+	"github.com/facilittei/ecomm/internal/services/payments"
 	"github.com/stretchr/testify/assert"
+	"io"
 	"net/http"
+	"net/http/httptest"
 	"testing"
 )
 
-func TestChargeEndpoint(t *testing.T) {
-	app := NewApp(config.Config{Port: "80"}).Routes()
-
-	req, err := http.NewRequest(http.MethodPost, "/v1/payments/charge", nil)
+func TestJunoChargeEndpoint(t *testing.T) {
+	w := httptest.NewRecorder()
+	r, err := http.NewRequest(http.MethodGet, "/v1/payments/juno", nil)
 	if err != nil {
-		t.Errorf("error making HTTP request to /v1/payments/charge %v", err)
+		t.Fatal(err)
 	}
 
-	res, err := app.Test(req, -1)
-	assert.Equalf(t, http.StatusOK, res.StatusCode, "payments charge route")
+	junoPaymentCtrl := NewPayment(services.NewJuno())
+	junoPaymentCtrl.Charge(w, r)
+
+	res := w.Result()
+	assert.Equalf(t, http.StatusOK, res.StatusCode, "juno route")
+	defer res.Body.Close()
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	want := "pending"
+	got := string(body)
+	if got != want {
+		t.Errorf("got %v but want %v", got, want)
+	}
 }

@@ -2,7 +2,7 @@ package controllers
 
 import (
 	"github.com/facilittei/ecomm/internal/services"
-	"github.com/gofiber/fiber/v2"
+	"net/http"
 )
 
 // Healthcheck resource-related requests
@@ -18,6 +18,7 @@ func NewHealthcheck(healthcheckSrv *services.Healthcheck) *Healthcheck {
 }
 
 // Index returns system status info
-func (h *Healthcheck) Index(ctx *fiber.Ctx) error {
-	return ctx.JSON(h.HealthcheckSrv.Index())
+func (h *Healthcheck) Index(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(h.HealthcheckSrv.Index()["status"]))
 }

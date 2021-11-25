@@ -1,20 +1,35 @@
 package controllers
 
 import (
-	"github.com/facilittei/ecomm/internal/config"
+	"github.com/facilittei/ecomm/internal/services"
 	"github.com/stretchr/testify/assert"
+	"io"
 	"net/http"
+	"net/http/httptest"
 	"testing"
 )
 
 func TestHealthcheckEndpoint(t *testing.T) {
-	app := NewApp(config.Config{Port: "80"}).Routes()
-
-	req, err := http.NewRequest(http.MethodGet, "/v1/healthcheck", nil)
+	w := httptest.NewRecorder()
+	r, err := http.NewRequest(http.MethodGet, "/v1/healthcheck", nil)
 	if err != nil {
-		t.Errorf("error making HTTP request to /v1/healthcheck %v", err)
+		t.Fatal(err)
 	}
 
-	res, err := app.Test(req, -1)
+	h := NewHealthcheck(services.NewHealthcheck())
+	h.Index(w, r)
+
+	res := w.Result()
 	assert.Equalf(t, http.StatusOK, res.StatusCode, "healthcheck route")
+	defer res.Body.Close()
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	want := "available"
+	got := string(body)
+	if got != want {
+		t.Errorf("got %v but want %v", got, want)
+	}
 }
