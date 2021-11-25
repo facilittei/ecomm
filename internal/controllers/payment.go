@@ -1,8 +1,8 @@
 package controllers
 
 import (
-	services "github.com/facilittei/ecomm/internal/services/payments"
-	"github.com/gofiber/fiber/v2"
+	"github.com/facilittei/ecomm/internal/services/payments"
+	"net/http"
 )
 
 // Payment requests for specific payment provider
@@ -18,6 +18,6 @@ func NewPayment(paymentSrv services.Payment) *Payment {
 }
 
 // Charge customer for the desired products
-func (p *Payment) Charge(ctx *fiber.Ctx) error {
-	return ctx.JSON(p.PaymentSrv.Charge())
+func (p *Payment) Charge(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte(p.PaymentSrv.Charge()["status"]))
 }
