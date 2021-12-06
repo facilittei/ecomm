@@ -1,5 +1,3 @@
-include .envrc
-
 .PHONY: docker/build
 docker/build:
 	@echo 'Building facilittei/ecomm image'
