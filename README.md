@@ -28,13 +28,16 @@ Default login: admin/admin
 
 ### Testing
 
-We use [Testify](https://github.com/stretchr/testify) as our testing library in conjunction with the standard library from Go.
+We use [Testify](https://github.com/stretchr/testify) as our testing library in conjunction with the standard library
+from Go.
 
-This library also provides Mock capabilities and in order to auto-generate interfaces we can use [Mockery](https://github.com/vektra/mockery)
+This library also provides Mock capabilities and in order to auto-generate interfaces we can
+use [Mockery](https://github.com/vektra/mockery)
 
 To generate a Mock from an interface go to the interface folder and run:
 
 E.g.
+
 ```
 cd internal/commmunications/http
 ```
@@ -46,3 +49,8 @@ mockery --name=HttpClient --output ./../../mocks/ --filename http_client.go --st
 This command will generate a mock for our tests.
 
 Usage:
+
+```
+httpClient := &mocks.HttpClientMock{}
+httpClient.On("Post").Return(nil, nil)
+```
