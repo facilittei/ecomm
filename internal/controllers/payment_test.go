@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"github.com/facilittei/ecomm/internal/mocks"
+	providers "github.com/facilittei/ecomm/internal/providers/juno"
 	"github.com/facilittei/ecomm/internal/services/payments"
 	"github.com/stretchr/testify/assert"
 	"io"
@@ -16,7 +18,10 @@ func TestJunoChargeEndpoint(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	junoPaymentCtrl := NewPayment(services.NewJuno())
+	authRepository := &mocks.AuthRepositoryhMock{}
+	authRepository.On("Get").Return("token", nil)
+	authRepository.On("Store").Return(nil)
+	junoPaymentCtrl := NewPayment(services.NewJuno(&providers.Juno{}, authRepository))
 	junoPaymentCtrl.Charge(w, r)
 
 	res := w.Result()

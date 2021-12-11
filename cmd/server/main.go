@@ -1,16 +1,25 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/facilittei/ecomm/internal/config"
 	"github.com/facilittei/ecomm/internal/routes"
+	"github.com/go-redis/redis/v8"
 	"log"
 	"net/http"
 )
 
 func main() {
+	ctx := context.Background()
 	cfg := config.NewConfig()
-	routes := routes.NewApi()
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     fmt.Sprintf("%s:%s", cfg.RedisHost, cfg.RedisPort),
+		Password: "",
+		DB:       0,
+	})
+
+	routes := routes.NewApi(ctx, rdb)
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%s", cfg.Port),
 		Handler: routes.Expose(),

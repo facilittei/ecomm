@@ -1,8 +1,12 @@
 package providers
 
 import (
+	"encoding/json"
 	"fmt"
 	communications "github.com/facilittei/ecomm/internal/communications/http"
+	"io"
+	"log"
+	"net/http"
 	"os"
 )
 
@@ -38,13 +42,35 @@ func (j *Juno) Authenticate() (*JunoAuth, error) {
 		return nil, authError(fmt.Sprintf("env required: %s", envAuthBasic))
 	}
 
-	_, err := j.httpClient.Post(endpoint+authUrlPath, nil, map[string]string{
+	res, err := j.httpClient.Post(endpoint+authUrlPath, nil, map[string]string{
 		"Content-Type":  "application/x-www-form-urlencoded",
-		"Authorization": authBasic,
+		"Authorization": fmt.Sprintf("Basic %s", authBasic),
 	})
 	if err != nil {
 		return nil, authError(fmt.Sprintf("http post request has failed: %v", err))
 	}
 
-	return nil, nil
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return nil, authError(fmt.Sprintf("error trying read response: %v", err))
+	}
+
+	defer func() {
+		err := res.Body.Close()
+		if err != nil {
+			log.Printf("could not close request body: %v", err)
+		}
+	}()
+
+	if res.StatusCode != http.StatusOK {
+		return nil, authError(string(body))
+	}
+
+	auth := &JunoAuth{}
+	err = json.Unmarshal(body, auth)
+	if err != nil {
+		return nil, authError(fmt.Sprintf("error trying unmarshal response: %v", err))
+	}
+
+	return auth, nil
 }

@@ -17,25 +17,16 @@ func TestJuno_Authenticate_env_required(t *testing.T) {
 	tests := []struct {
 		name string
 		args map[string]string
-		want result
 	}{
 		{
 			name: "JUNO_AUTHORIZATION_URL is missing",
 			args: map[string]string{"JUNO_AUTHORIZATION_URL": ""},
-			want: result{
-				token: JunoAuth{},
-				error: authError("env required: JUNO_AUTHORIZATION_URL"),
-			},
 		},
 		{
 			name: "JUNO_AUTHORIZATION_BASIC is missing",
 			args: map[string]string{
 				"JUNO_AUTHORIZATION_URL":   "https://url.test",
 				"JUNO_AUTHORIZATION_BASIC": "",
-			},
-			want: result{
-				token: JunoAuth{},
-				error: authError("env required: JUNO_AUTHORIZATION_BASIC"),
 			},
 		},
 	}
@@ -53,7 +44,6 @@ func TestJuno_Authenticate_env_required(t *testing.T) {
 
 				junoProvider := NewJuno(httpClient)
 				_, got := junoProvider.Authenticate()
-				assert.Equal(t, got, tt.want.error)
 				assert.True(t, errors.As(got, &JunoAuthError{}))
 			}
 		})

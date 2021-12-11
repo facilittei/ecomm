@@ -19,5 +19,11 @@ func NewPayment(paymentSrv services.Payment) *Payment {
 
 // Charge customer for the desired products
 func (p *Payment) Charge(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte(p.PaymentSrv.Charge()["status"]))
+	charge, err := p.PaymentSrv.Charge()
+	if err != nil {
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		w.Write([]byte(err.Error()))
+	}
+
+	w.Write([]byte(charge["status"]))
 }

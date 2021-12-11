@@ -4,14 +4,16 @@ import "os"
 
 // Config holds application settings
 type Config struct {
-	Port string
+	Port      string
+	RedisHost string
+	RedisPort string
 }
 
 // NewConfig creates an instance of Config
 func NewConfig() Config {
-	port := os.Getenv("PORT")
-
 	return Config{
-		Port: port,
+		Port:      os.Getenv("PORT"),
+		RedisHost: os.Getenv("REDIS_HOST"),
+		RedisPort: os.Getenv("REDIS_PORT"),
 	}
 }
