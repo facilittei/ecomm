@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	providers "github.com/facilittei/ecomm/internal/providers/juno"
 	repositories "github.com/facilittei/ecomm/internal/repositories/auth"
 	"log"
@@ -22,7 +23,8 @@ func NewJuno(junoProvider *providers.Juno, authRepository repositories.Auth) *Ju
 
 // Charge customer using Juno payment provider
 func (j *Juno) Charge() (map[string]string, error) {
-	token, err := j.authRepository.Get()
+	ctx := context.Background()
+	token, err := j.authRepository.Get(ctx)
 	if err != nil {
 		auth, err := j.junoProvider.Authenticate()
 		if err != nil {
@@ -33,7 +35,7 @@ func (j *Juno) Charge() (map[string]string, error) {
 		}
 		token = auth.AccessToken
 
-		if err := j.authRepository.Store(token); err != nil {
+		if err := j.authRepository.Store(ctx, token); err != nil {
 			log.Printf("could not store auth token on repository: %v", err) //TODO: logging err to centralized system
 		}
 	}

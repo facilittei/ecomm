@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"github.com/facilittei/ecomm/internal/config"
 	"github.com/facilittei/ecomm/internal/routes"
@@ -11,7 +10,6 @@ import (
 )
 
 func main() {
-	ctx := context.Background()
 	cfg := config.NewConfig()
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     fmt.Sprintf("%s:%s", cfg.RedisHost, cfg.RedisPort),
@@ -19,7 +17,7 @@ func main() {
 		DB:       0,
 	})
 
-	routes := routes.NewApi(ctx, rdb)
+	routes := routes.NewApi(rdb)
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%s", cfg.Port),
 		Handler: routes.Expose(),

@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"context"
 	communications "github.com/facilittei/ecomm/internal/communications/http"
 	"github.com/facilittei/ecomm/internal/controllers"
 	providers "github.com/facilittei/ecomm/internal/providers/juno"
@@ -23,15 +22,13 @@ func init() {
 
 // Api wraps http router for handler compliance
 type Api struct {
-	ctx         context.Context
 	router      *httprouter.Router
 	redisClient *redis.Client
 }
 
 // NewApi creates an instance of Router
-func NewApi(ctx context.Context, redisClient *redis.Client) *Api {
+func NewApi(redisClient *redis.Client) *Api {
 	return &Api{
-		ctx:         ctx,
 		router:      httprouter.New(),
 		redisClient: redisClient,
 	}
@@ -43,7 +40,7 @@ func (api *Api) Expose() http.Handler {
 
 	httpClient := communications.NewRequester()
 	junoProvider := providers.NewJuno(httpClient)
-	authRepository := repositories.NewRedis(api.ctx, api.redisClient)
+	authRepository := repositories.NewRedis(api.redisClient)
 	paymentCtl := controllers.NewPayment(paymentSrv.NewJuno(junoProvider, authRepository))
 
 	api.router.HandlerFunc(http.MethodGet, "/v1/healthcheck", healthcheckCtrl.Index)
