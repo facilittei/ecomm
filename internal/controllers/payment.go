@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"encoding/json"
+	"github.com/facilittei/ecomm/internal/domains/payment"
 	"github.com/facilittei/ecomm/internal/services/payments"
 	"net/http"
 )
@@ -17,13 +19,34 @@ func NewPayment(paymentSrv services.Payment) *Payment {
 	}
 }
 
-// Charge customer for the desired products
+// Charge customer for the desired product
 func (p *Payment) Charge(w http.ResponseWriter, r *http.Request) {
-	charge, err := p.PaymentSrv.Charge()
+	dec := json.NewDecoder(r.Body)
+	dec.DisallowUnknownFields()
+
+	w.Header().Set("Content-Type", "application/json")
+
+	var paymentRequest payment.Request
+	err := dec.Decode(&paymentRequest)
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		w.Write([]byte(err.Error()))
+		return
 	}
 
-	w.Write([]byte(charge["status"]))
+	charge, err := p.PaymentSrv.Charge()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	res, err := json.Marshal(charge)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	w.Write(res)
 }
