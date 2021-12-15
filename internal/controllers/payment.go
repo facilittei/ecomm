@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/facilittei/ecomm/internal/domains/payment"
 	"github.com/facilittei/ecomm/internal/services/payments"
+	"log"
 	"net/http"
 )
 
@@ -24,29 +25,42 @@ func (p *Payment) Charge(w http.ResponseWriter, r *http.Request) {
 	dec := json.NewDecoder(r.Body)
 	dec.DisallowUnknownFields()
 
-	w.Header().Set("Content-Type", "application/json")
-
 	var paymentRequest payment.Request
 	err := dec.Decode(&paymentRequest)
 	if err != nil {
-		w.WriteHeader(http.StatusUnprocessableEntity)
-		w.Write([]byte(err.Error()))
+		log.Printf("payment request decode error [dec.Decode]: %v", err)
+		if err = SendUnprocessableEntityJSON(w, Envelope{
+			"status":  "failed",
+			"message": http.StatusText(http.StatusUnprocessableEntity),
+		}, nil); err != nil {
+			log.Printf("payment charge response error [SendUnprocessableEntityJSON]: %v", err)
+		}
 		return
+	}
+
+	if errs := paymentRequest.Validate(); errs != nil {
+		if err := SendUnprocessableEntityJSON(w, Envelope{
+			"status":  "failed",
+			"message": http.StatusText(http.StatusUnprocessableEntity),
+			"errors":  DisplayErrors(errs),
+		}, nil); err != nil {
+			log.Printf("payment charge response error [SendUnprocessableEntityJSON]: %v", err)
+		}
 	}
 
 	charge, err := p.PaymentSrv.Charge()
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
+		log.Printf("payment service charge error: %v", err)
+		if err := SendInternalErrorJSON(w, Envelope{
+			"status":  "failed",
+			"message": http.StatusText(http.StatusInternalServerError),
+		}, nil); err != nil {
+			log.Printf("payment charge response error [SendInternalErrorJSON]: %v", err)
+		}
 		return
 	}
 
-	res, err := json.Marshal(charge)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
-		return
+	if err := SendOkJSON(w, Envelope{"charge": charge}, nil); err != nil {
+		log.Printf("payment charge response error [SendOkJSON]: %v", err)
 	}
-
-	w.Write(res)
 }
