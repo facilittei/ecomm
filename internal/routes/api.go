@@ -1,12 +1,12 @@
 package routes
 
 import (
-	communications "github.com/facilittei/ecomm/internal/communications/http"
 	"github.com/facilittei/ecomm/internal/controllers"
 	providers "github.com/facilittei/ecomm/internal/providers/juno"
 	repositories "github.com/facilittei/ecomm/internal/repositories/auth"
 	"github.com/facilittei/ecomm/internal/services"
 	paymentSrv "github.com/facilittei/ecomm/internal/services/payments"
+	transports "github.com/facilittei/ecomm/internal/transports/http"
 	"github.com/go-redis/redis/v8"
 	"github.com/julienschmidt/httprouter"
 	"github.com/prometheus/client_golang/prometheus"
@@ -38,7 +38,7 @@ func NewApi(redisClient *redis.Client) *Api {
 func (api *Api) Expose() http.Handler {
 	healthcheckCtrl := controllers.NewHealthcheck(services.NewHealthcheck())
 
-	httpClient := communications.NewRequester()
+	httpClient := transports.NewRequester()
 	junoProvider := providers.NewJuno(httpClient)
 	authRepository := repositories.NewRedis(api.redisClient)
 	paymentCtl := controllers.NewPayment(paymentSrv.NewJuno(junoProvider, authRepository))

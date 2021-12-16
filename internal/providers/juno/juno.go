@@ -3,7 +3,7 @@ package providers
 import (
 	"encoding/json"
 	"fmt"
-	communications "github.com/facilittei/ecomm/internal/communications/http"
+	transports "github.com/facilittei/ecomm/internal/transports/http"
 	"io"
 	"log"
 	"net/http"
@@ -19,11 +19,11 @@ const (
 
 // Juno payment gateway
 type Juno struct {
-	httpClient communications.HttpClient
+	httpClient transports.HttpClient
 }
 
 // NewJuno creates an instance of Juno
-func NewJuno(httpClient communications.HttpClient) *Juno {
+func NewJuno(httpClient transports.HttpClient) *Juno {
 	return &Juno{
 		httpClient: httpClient,
 	}
