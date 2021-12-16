@@ -22,7 +22,7 @@ func (req *Request) Validate() []error {
 		errs = append(errs, ErrAmount)
 	}
 
-	if err := req.CreditCard.Validate(); errs != nil {
+	if err := req.CreditCard.Validate(); err != nil {
 		errs = append(errs, err...)
 	}
 

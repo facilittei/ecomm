@@ -10,9 +10,10 @@ type Customer struct {
 
 // Address for a customer who wants to buy a product
 type Address struct {
-	Street   string `json:"street"`
-	Number   string `json:"number"`
-	City     string `json:"city"`
-	State    string `json:"state"`
-	PostCode string `json:"postCode"`
+	Street     string `json:"street"`
+	Number     string `json:"number"`
+	Complement string `json:"complement"`
+	City       string `json:"city"`
+	State      string `json:"state"`
+	PostCode   string `json:"postCode"`
 }
