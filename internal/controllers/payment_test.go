@@ -48,8 +48,9 @@ func TestJunoChargeEndpoint(t *testing.T) {
 	authRepository.On("Get", ctx).Return(token, nil)
 	authRepository.On("Store", ctx, token).Return(nil)
 
-	junoSrv := services.NewJuno(junoProvider, authRepository)
-	junoPaymentCtrl := NewPayment(junoSrv)
+	logger := &mocks.LoggerMock{}
+	junoSrv := services.NewJuno(logger, junoProvider, authRepository)
+	junoPaymentCtrl := NewPayment(logger, junoSrv)
 	junoPaymentCtrl.Charge(w, r)
 
 	res := w.Result()
@@ -93,8 +94,9 @@ func TestJunoChargeEndpointMissingFields(t *testing.T) {
 	authRepository.On("Get", ctx).Return(token, nil)
 	authRepository.On("Store", ctx, token).Return(nil)
 
-	junoSrv := services.NewJuno(junoProvider, authRepository)
-	junoPaymentCtrl := NewPayment(junoSrv)
+	logger := &mocks.LoggerMock{}
+	junoSrv := services.NewJuno(logger, junoProvider, authRepository)
+	junoPaymentCtrl := NewPayment(logger, junoSrv)
 	junoPaymentCtrl.Charge(w, r)
 
 	res := w.Result()

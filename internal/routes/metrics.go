@@ -20,13 +20,19 @@ var httpDuration = promauto.NewHistogramVec(prometheus.HistogramOpts{
 // timedOperation gets how long a request/response took
 type timedOperation struct {
 	http.ResponseWriter
-	statusCode int
+	statusCode  int
+	wroteHeader bool
 }
 
 // WriteHeader tracks response status code
 func (t *timedOperation) WriteHeader(statusCode int) {
+	if t.wroteHeader {
+		return
+	}
+
 	t.statusCode = statusCode
 	t.ResponseWriter.WriteHeader(statusCode)
+	t.wroteHeader = true
 }
 
 // metrics capture application internal state

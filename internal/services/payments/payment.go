@@ -1,6 +1,8 @@
 package services
 
+import "github.com/facilittei/ecomm/internal/domains/payment"
+
 // Payment provides clear interface for payment processing
 type Payment interface {
-	Charge() (map[string]string, error)
+	Charge(req payment.Request) (map[string]string, error)
 }

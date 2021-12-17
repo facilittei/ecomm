@@ -3,19 +3,21 @@ package controllers
 import (
 	"encoding/json"
 	"github.com/facilittei/ecomm/internal/domains/payment"
+	"github.com/facilittei/ecomm/internal/logging"
 	"github.com/facilittei/ecomm/internal/services/payments"
-	"log"
 	"net/http"
 )
 
 // Payment requests for specific payment provider
 type Payment struct {
+	logger     logging.Logger
 	PaymentSrv services.Payment
 }
 
 // NewPayment creates an instance of Payment
-func NewPayment(paymentSrv services.Payment) *Payment {
+func NewPayment(logger logging.Logger, paymentSrv services.Payment) *Payment {
 	return &Payment{
+		logger:     logger,
 		PaymentSrv: paymentSrv,
 	}
 }
@@ -28,12 +30,12 @@ func (p *Payment) Charge(w http.ResponseWriter, r *http.Request) {
 	var paymentRequest payment.Request
 	err := dec.Decode(&paymentRequest)
 	if err != nil {
-		log.Printf("payment request decode error [dec.Decode]: %v", err)
+		p.logger.Error("payment request decode error [dec.Decode]: %v", err)
 		if err = SendUnprocessableEntityJSON(w, Envelope{
 			"status":  "failed",
 			"message": http.StatusText(http.StatusUnprocessableEntity),
 		}, nil); err != nil {
-			log.Printf("payment charge response error [SendUnprocessableEntityJSON]: %v", err)
+			p.logger.Error("payment charge response error [SendUnprocessableEntityJSON]: %v", err)
 		}
 		return
 	}
@@ -44,23 +46,23 @@ func (p *Payment) Charge(w http.ResponseWriter, r *http.Request) {
 			"message": http.StatusText(http.StatusUnprocessableEntity),
 			"errors":  DisplayErrors(errs),
 		}, nil); err != nil {
-			log.Printf("payment charge response error [SendUnprocessableEntityJSON]: %v", err)
+			p.logger.Error("payment charge response error [SendUnprocessableEntityJSON]: %v", err)
 		}
 	}
 
-	charge, err := p.PaymentSrv.Charge()
+	charge, err := p.PaymentSrv.Charge(paymentRequest)
 	if err != nil {
-		log.Printf("payment service charge error: %v", err)
+		p.logger.Error("payment service charge error: %v", err)
 		if err := SendInternalErrorJSON(w, Envelope{
 			"status":  "failed",
 			"message": http.StatusText(http.StatusInternalServerError),
 		}, nil); err != nil {
-			log.Printf("payment charge response error [SendInternalErrorJSON]: %v", err)
+			p.logger.Error("payment charge response error [SendInternalErrorJSON]: %v", err)
 		}
 		return
 	}
 
 	if err := SendOkJSON(w, Envelope{"charge": charge}, nil); err != nil {
-		log.Printf("payment charge response error [SendOkJSON]: %v", err)
+		p.logger.Error("payment charge response error [SendOkJSON]: %v", err)
 	}
 }

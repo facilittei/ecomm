@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/facilittei/ecomm/internal/config"
+	"github.com/facilittei/ecomm/internal/logging"
 	"github.com/facilittei/ecomm/internal/routes"
 	"github.com/go-redis/redis/v8"
 	"log"
@@ -17,7 +18,8 @@ func main() {
 		DB:       0,
 	})
 
-	routes := routes.NewApi(rdb)
+	logger := logging.NewZeroLogger()
+	routes := routes.NewApi(logger, rdb)
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%s", cfg.Port),
 		Handler: routes.Expose(),

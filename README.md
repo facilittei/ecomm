@@ -43,7 +43,7 @@ cd internal/commmunications/http
 ```
 
 ```
-mockery --name=HttpClient --output ./../../mocks/ --filename http_client.go --structname HttpClientMock
+mockery --name=HttpClient --output ./../../mocks/ --filename http_client_mock_test.go --structname HttpClientMock
 ```
 
 This command will generate a mock for our tests.

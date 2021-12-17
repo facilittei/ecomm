@@ -2,6 +2,7 @@ package routes
 
 import (
 	"github.com/facilittei/ecomm/internal/controllers"
+	"github.com/facilittei/ecomm/internal/logging"
 	providers "github.com/facilittei/ecomm/internal/providers/juno"
 	repositories "github.com/facilittei/ecomm/internal/repositories/auth"
 	"github.com/facilittei/ecomm/internal/services"
@@ -24,13 +25,15 @@ func init() {
 type Api struct {
 	router      *httprouter.Router
 	redisClient *redis.Client
+	logger      logging.Logger
 }
 
 // NewApi creates an instance of Router
-func NewApi(redisClient *redis.Client) *Api {
+func NewApi(logger logging.Logger, redisClient *redis.Client) *Api {
 	return &Api{
-		router:      httprouter.New(),
+		logger:      logger,
 		redisClient: redisClient,
+		router:      httprouter.New(),
 	}
 }
 
@@ -41,7 +44,9 @@ func (api *Api) Expose() http.Handler {
 	httpClient := transports.NewRequester()
 	junoProvider := providers.NewJuno(httpClient)
 	authRepository := repositories.NewRedis(api.redisClient)
-	paymentCtl := controllers.NewPayment(paymentSrv.NewJuno(junoProvider, authRepository))
+
+	paySrv := paymentSrv.NewJuno(api.logger, junoProvider, authRepository)
+	paymentCtl := controllers.NewPayment(api.logger, paySrv)
 
 	api.router.HandlerFunc(http.MethodGet, "/v1/healthcheck", healthcheckCtrl.Index)
 	api.router.HandlerFunc(http.MethodPost, "/v1/payments/charge", paymentCtl.Charge)
