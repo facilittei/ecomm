@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"errors"
 	"github.com/facilittei/ecomm/internal/domains/payment"
 	"github.com/facilittei/ecomm/internal/logging"
 	providers "github.com/facilittei/ecomm/internal/providers/juno"
@@ -43,13 +44,26 @@ func (j *Juno) Charge(req payment.Request) (map[string]string, error) {
 		}
 
 		token = auth.AccessToken
-
-		if err := j.authRepository.Store(ctx, token); err != nil {
+		if err := j.authRepository.Store(ctx, auth.AccessToken); err != nil {
 			j.logger.Warn("could not store auth token on repository: %v", err)
 		}
 	}
 
-	return map[string]string{
-		"status": "pending",
-	}, nil
+	j.junoProvider.UseToken(token)
+
+	res, err := j.junoProvider.Charge(req)
+	if err != nil {
+		return nil, err
+	}
+
+	if pay, ok := res.(*providers.JunoPayResponse); ok {
+		return map[string]string{
+			"transactionId": pay.TransactionID,
+			"id":            pay.Payments[0].ID,
+			"status":        pay.Payments[0].Status,
+			"message":       pay.Payments[0].Message,
+		}, nil
+	}
+
+	return nil, errors.New("charge has failed")
 }

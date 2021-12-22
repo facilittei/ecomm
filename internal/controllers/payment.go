@@ -48,6 +48,7 @@ func (p *Payment) Charge(w http.ResponseWriter, r *http.Request) {
 		}, nil); err != nil {
 			p.logger.Error("payment charge response error [SendUnprocessableEntityJSON]: %v", err)
 		}
+		return
 	}
 
 	charge, err := p.PaymentSrv.Charge(paymentRequest)

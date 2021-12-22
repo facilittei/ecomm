@@ -2,10 +2,9 @@ package controllers
 
 import (
 	"bytes"
-	"context"
+	"github.com/facilittei/ecomm/internal/domains/customer"
+	"github.com/facilittei/ecomm/internal/domains/payment"
 	"github.com/facilittei/ecomm/internal/mocks"
-	providers "github.com/facilittei/ecomm/internal/providers/juno"
-	"github.com/facilittei/ecomm/internal/services/payments"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"io"
@@ -36,20 +35,34 @@ func TestJunoChargeEndpoint(t *testing.T) {
 			"hash": "cbdbb8f4-53a9-42e8-a077-83af06823e85"
 		}
 	}`))
-	r := httptest.NewRequest(http.MethodGet, "/v1/payments/juno", payload)
-
-	ctx := context.Background()
-	httpClient := &mocks.HttpClientMock{}
-	httpClient.On("Post").Return(r, nil)
-	junoProvider := providers.NewJuno(httpClient)
-
-	token := "1234abc"
-	authRepository := &mocks.AuthRepositoryhMock{}
-	authRepository.On("Get", ctx).Return(token, nil)
-	authRepository.On("Store", ctx, token).Return(nil)
+	r := httptest.NewRequest(http.MethodGet, "/v1/payments", payload)
 
 	logger := &mocks.LoggerMock{}
-	junoSrv := services.NewJuno(logger, junoProvider, authRepository)
+	junoSrv := &mocks.PaymentServiceMock{}
+	junoSrv.On("Charge", payment.Request{
+		Description: "My awesome product",
+		Amount:      0.99,
+		Customer: customer.Customer{
+			Name:     "Jeff Bezos",
+			Email:    "jeff@amazon.com",
+			Document: "11144740452",
+			Address: customer.Address{
+				Street:   "Rua Guedes Perreira",
+				Number:   "90",
+				City:     "Recife",
+				State:    "PE",
+				PostCode: "52060150",
+			},
+		},
+		CreditCard: payment.CreditCard{
+			Hash: "cbdbb8f4-53a9-42e8-a077-83af06823e85",
+		},
+	}).Return(map[string]string{
+		"transactionId": "123abc",
+		"id":            "abc123",
+		"status":        "CONFIRMED",
+		"message":       "",
+	}, nil)
 	junoPaymentCtrl := NewPayment(logger, junoSrv)
 	junoPaymentCtrl.Charge(w, r)
 
@@ -82,20 +95,24 @@ func TestJunoChargeEndpointMissingFields(t *testing.T) {
 			}
 		}
 	}`))
-	r := httptest.NewRequest(http.MethodGet, "/v1/payments/juno", payload)
-
-	ctx := context.Background()
-	httpClient := &mocks.HttpClientMock{}
-	httpClient.On("Post").Return(r, nil)
-	junoProvider := providers.NewJuno(httpClient)
-
-	token := "1234abc"
-	authRepository := &mocks.AuthRepositoryhMock{}
-	authRepository.On("Get", ctx).Return(token, nil)
-	authRepository.On("Store", ctx, token).Return(nil)
+	r := httptest.NewRequest(http.MethodGet, "/v1/payments", payload)
 
 	logger := &mocks.LoggerMock{}
-	junoSrv := services.NewJuno(logger, junoProvider, authRepository)
+	junoSrv := &mocks.PaymentServiceMock{}
+	junoSrv.On("Charge", payment.Request{
+		Customer: customer.Customer{
+			Name:     "Jeff Bezos",
+			Email:    "jeff@amazon.com",
+			Document: "11144740452",
+			Address: customer.Address{
+				Street:   "Rua Guedes Perreira",
+				Number:   "90",
+				City:     "Recife",
+				State:    "PE",
+				PostCode: "52060150",
+			},
+		},
+	}).Return(nil, nil)
 	junoPaymentCtrl := NewPayment(logger, junoSrv)
 	junoPaymentCtrl.Charge(w, r)
 
@@ -105,7 +122,7 @@ func TestJunoChargeEndpointMissingFields(t *testing.T) {
 	require.Empty(t, err)
 
 	got := string(body)
-	want := `{"errors":["description is required","amount must be greater than 0","credit card hash is required"],"message":"Unprocessable Entity","status":"failed"}{"charge":{"status":"pending"}}`
+	want := `{"errors":["description is required","amount must be greater than 0","credit card hash is required"],"message":"Unprocessable Entity","status":"failed"}`
 	assert.Equal(t, want, got)
 	assert.Equal(t, http.StatusUnprocessableEntity, res.StatusCode)
 }
