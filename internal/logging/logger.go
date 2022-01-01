@@ -1,3 +1,5 @@
+//go:generate mockery --name=Logger --output ./../mocks/ --filename logger.go --structname LoggerMock
+
 package logging
 
 // Logger levels information

@@ -1,3 +1,5 @@
+//go:generate mockery --name=HttpClient --output ./../../mocks/ --filename http_client.go --structname HttpClientMock
+
 package transports
 
 import "net/http"

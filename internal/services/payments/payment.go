@@ -1,3 +1,5 @@
+//go:generate mockery --name=Payment --output ./../../mocks/ --filename payment_service.go --structname PaymentServiceMock
+
 package services
 
 import "github.com/facilittei/ecomm/internal/domains/payment"

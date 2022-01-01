@@ -1,11 +1,14 @@
 package payment
 
-import "errors"
+import (
+	"errors"
+)
 
 var (
 	ErrDescription    = errors.New("description is required")
 	ErrAmount         = errors.New("amount must be greater than 0")
 	ErrCreditCardHash = errors.New("credit card hash is required")
+	ErrChargeID       = errors.New("charge ID is required")
 )
 
 // Validate checks whether the Request payload
@@ -22,6 +25,10 @@ func (req *Request) Validate() []error {
 		errs = append(errs, ErrAmount)
 	}
 
+	if err := req.Customer.Validate(); err != nil {
+		errs = append(errs, err...)
+	}
+
 	if err := req.CreditCard.Validate(); err != nil {
 		errs = append(errs, err...)
 	}
@@ -35,6 +42,21 @@ func (req *CreditCard) Validate() []error {
 
 	if req.Hash == "" {
 		errs = append(errs, ErrCreditCardHash)
+	}
+
+	return errs
+}
+
+// Validate checks whether the Charge has required fields
+func (c Charge) Validate() []error {
+	var errs []error
+
+	if c.ID.String() == "00000000-0000-0000-0000-000000000000" {
+		errs = append(errs, ErrChargeID)
+	}
+
+	if err := c.Customer.Validate(); err != nil {
+		errs = append(errs, err...)
 	}
 
 	return errs

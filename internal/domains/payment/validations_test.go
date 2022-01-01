@@ -10,7 +10,7 @@ func TestRequest_Validate(t *testing.T) {
 	customer := customer.Customer{
 		Name:     "Bill Gates",
 		Email:    "bill@microsoft.com",
-		Document: "00011122233",
+		Document: "73379578070",
 		Address: customer.Address{
 			Street:   "Rua ABC",
 			Number:   "1234",
@@ -66,6 +66,62 @@ func TestRequest_Validate(t *testing.T) {
 				ErrDescription,
 				ErrAmount,
 				ErrCreditCardHash,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.args.Validate()
+			assert.Equal(t, tt.want, got)
+			assert.Len(t, got, len(tt.want))
+		})
+	}
+}
+
+func TestCharge_Validate(t *testing.T) {
+	tests := []struct {
+		name string
+		args Charge
+		want []error
+	}{
+		{
+			name: "ID is missing",
+			args: Charge{
+				Customer: customer.Customer{
+					Name:     "Bill Gates",
+					Email:    "bill@microsoft.com",
+					Document: "73379578070",
+					Address: customer.Address{
+						Street:   "Rua ABC",
+						Number:   "1234",
+						City:     "Recife",
+						State:    "PE",
+						PostCode: "51000000",
+					},
+				},
+			},
+			want: []error{ErrChargeID},
+		},
+		{
+			name: "ID, document and postcode are",
+			args: Charge{
+				Customer: customer.Customer{
+					Name:     "Bill Gates",
+					Email:    "bill@microsoft.com",
+					Document: "00011122233",
+					Address: customer.Address{
+						Street: "Rua ABC",
+						Number: "1234",
+						City:   "Recife",
+						State:  "PE",
+					},
+				},
+			},
+			want: []error{
+				ErrChargeID,
+				customer.ErrDocumentInvalid,
+				customer.ErrAddressPostCode,
 			},
 		},
 	}

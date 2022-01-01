@@ -34,7 +34,12 @@ from Go.
 This library also provides Mock capabilities and in order to auto-generate interfaces we can
 use [Mockery](https://github.com/vektra/mockery)
 
-To generate a Mock from an interface go to the interface folder and run:
+You can create all mocks by running `go generate ./...` and the files that has the annotation below, they'll be automatically generated.
+```
+//go:generate mockery --name=HttpClient --output ./../../mocks/ --filename http_client.go --structname HttpClientMock
+```
+
+If you want to generate a specific Mock from an interface go to the interface folder and run:
 
 E.g.
 

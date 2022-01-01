@@ -1,3 +1,5 @@
+//go:generate mockery --name=Auth --output ./../../mocks/ --filename auth_repository.go --structname AuthRepositoryMock
+
 package repositories
 
 import "context"
