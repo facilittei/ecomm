@@ -1,0 +1,2 @@
+DROP TABLE IF EXISTS charges_history;
+DROP TABLE IF EXISTS charges;

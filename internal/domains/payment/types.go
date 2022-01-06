@@ -19,8 +19,16 @@ type CreditCard struct {
 	Hash string `json:"hash"`
 }
 
-// Charge holds payment charge states history
+// Charge holds payment charges
 type Charge struct {
 	ID       uuid.UUID         `json:"id"`
+	SKU      string            `json:"sku"`
 	Customer customer.Customer `json:"customer"`
+	History  []ChargeHistory   `json:"history"`
+}
+
+// ChargeHistory holds payment charge states
+type ChargeHistory struct {
+	Status      string `json:"status"`
+	Description string `json:"description"`
 }

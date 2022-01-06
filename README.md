@@ -34,7 +34,9 @@ from Go.
 This library also provides Mock capabilities and in order to auto-generate interfaces we can
 use [Mockery](https://github.com/vektra/mockery)
 
-You can create all mocks by running `go generate ./...` and the files that has the annotation below, they'll be automatically generated.
+You can create all mocks by running `go generate ./...` and the files that has the annotation below, they'll be
+automatically generated.
+
 ```
 //go:generate mockery --name=HttpClient --output ./../../mocks/ --filename http_client.go --structname HttpClientMock
 ```
@@ -43,11 +45,11 @@ If you want to generate a specific Mock from an interface go to the interface fo
 
 E.g.
 
-```
+```bash
 cd internal/commmunications/http
 ```
 
-```
+```bash
 mockery --name=HttpClient --output ./../../mocks/ --filename http_client.go --structname HttpClientMock
 ```
 
@@ -58,4 +60,29 @@ Usage:
 ```
 httpClient := &mocks.HttpClientMock{}
 httpClient.On("Post").Return(nil, nil)
+```
+
+## Migrations
+
+Our database version control is done with [go-migrate](https://github.com/golang-migrate/migrate).
+
+There are a couple of ways of installing it, and homebrew is one of them:
+
+```bash
+brew install golang-migrate
+```
+
+Every change to the database schema must be done through the usage of this tool.
+
+Usage:
+
+```bash
+migrate create -seq -ext=.sql -dir=./migrations create_charges_table
+```
+
+Applying migration:
+
+```bash
+export DSN='postgres://facilittei:4321@localhost/facilittei?sslmode=disable'
+migrate -path ./migrations -database ${DSN} up
 ```

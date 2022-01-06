@@ -44,6 +44,17 @@ services:
     networks:
       - ecomm-network
 
+  postgres:
+    image: postgres
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: facilittei
+      POSTGRES_PASSWORD: 4321
+    networks:
+      - ecomm-network
+
 networks:
   ecomm-network:
     driver: bridge
