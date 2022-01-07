@@ -1,7 +1,9 @@
 CREATE TABLE IF NOT EXISTS charges
 (
-    id                          CHAR(16)                    NOT NULL PRIMARY KEY,
+    id                          CHAR(36)                    NOT NULL PRIMARY KEY,
     sku                         VARCHAR(255)                NOT NULL,
+    amount                      DECIMAL(10, 2)              NOT NULL,
+    description                 VARCHAR(255)                NOT NULL,
     customer_name               VARCHAR(255)                NOT NULL,
     customer_email              VARCHAR(255)                NOT NULL,
     customer_document           VARCHAR(50)                 NOT NULL,

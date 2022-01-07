@@ -21,10 +21,12 @@ type CreditCard struct {
 
 // Charge holds payment charges
 type Charge struct {
-	ID       uuid.UUID         `json:"id"`
-	SKU      string            `json:"sku"`
-	Customer customer.Customer `json:"customer"`
-	History  []ChargeHistory   `json:"history"`
+	ID          uuid.UUID         `json:"id"`
+	SKU         string            `json:"sku"`
+	Amount      float64           `json:"amount"`
+	Description string            `json:"description"`
+	Customer    customer.Customer `json:"customer"`
+	History     []ChargeHistory   `json:"history"`
 }
 
 // ChargeHistory holds payment charge states
