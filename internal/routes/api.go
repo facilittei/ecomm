@@ -1,10 +1,12 @@
 package routes
 
 import (
+	"database/sql"
 	"github.com/facilittei/ecomm/internal/controllers"
 	"github.com/facilittei/ecomm/internal/logging"
 	providers "github.com/facilittei/ecomm/internal/providers/juno"
-	repositories "github.com/facilittei/ecomm/internal/repositories/auth"
+	authRepository "github.com/facilittei/ecomm/internal/repositories/auth"
+	chargeRepository "github.com/facilittei/ecomm/internal/repositories/charge"
 	"github.com/facilittei/ecomm/internal/services"
 	paymentSrv "github.com/facilittei/ecomm/internal/services/payments"
 	transports "github.com/facilittei/ecomm/internal/transports/http"
@@ -24,16 +26,22 @@ func init() {
 // Api wraps http router for handler compliance
 type Api struct {
 	router      *httprouter.Router
+	sqlClient   *sql.DB
 	redisClient *redis.Client
 	logger      logging.Logger
 }
 
 // NewApi creates an instance of Router
-func NewApi(logger logging.Logger, redisClient *redis.Client) *Api {
+func NewApi(
+	sqlClient *sql.DB,
+	redisClient *redis.Client,
+	logger logging.Logger,
+) *Api {
 	return &Api{
-		logger:      logger,
-		redisClient: redisClient,
 		router:      httprouter.New(),
+		sqlClient:   sqlClient,
+		redisClient: redisClient,
+		logger:      logger,
 	}
 }
 
@@ -43,9 +51,15 @@ func (api *Api) Expose() http.Handler {
 
 	httpClient := transports.NewRequester()
 	junoProvider := providers.NewJuno(httpClient)
-	authRepository := repositories.NewRedis(api.redisClient)
+	authRepository := authRepository.NewRedis(api.redisClient)
+	chargeRepository := chargeRepository.NewChargePsql(api.sqlClient)
 
-	paySrv := paymentSrv.NewJuno(api.logger, junoProvider, authRepository)
+	paySrv := paymentSrv.NewJuno(
+		api.logger,
+		junoProvider,
+		authRepository,
+		chargeRepository,
+	)
 	paymentCtl := controllers.NewPayment(api.logger, paySrv)
 
 	api.router.HandlerFunc(http.MethodGet, "/v1/healthcheck", healthcheckCtrl.Index)

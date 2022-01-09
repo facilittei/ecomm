@@ -6,26 +6,30 @@ import (
 	"github.com/facilittei/ecomm/internal/domains/payment"
 	"github.com/facilittei/ecomm/internal/logging"
 	providers "github.com/facilittei/ecomm/internal/providers/juno"
-	repositories "github.com/facilittei/ecomm/internal/repositories/auth"
+	authRepository "github.com/facilittei/ecomm/internal/repositories/auth"
+	chargeRepository "github.com/facilittei/ecomm/internal/repositories/charge"
 )
 
 // Juno handles payment transaction requests
 type Juno struct {
-	logger         logging.Logger
-	junoProvider   *providers.Juno
-	authRepository repositories.Auth
+	logger           logging.Logger
+	junoProvider     *providers.Juno
+	authRepository   authRepository.Auth
+	chargeRepository chargeRepository.Charge
 }
 
 // NewJuno creates an instance of Juno
 func NewJuno(
 	logger logging.Logger,
 	junoProvider *providers.Juno,
-	authRepository repositories.Auth,
+	authRepository authRepository.Auth,
+	chargeRepository chargeRepository.Charge,
 ) *Juno {
 	return &Juno{
-		logger:         logger,
-		junoProvider:   junoProvider,
-		authRepository: authRepository,
+		logger:           logger,
+		junoProvider:     junoProvider,
+		authRepository:   authRepository,
+		chargeRepository: chargeRepository,
 	}
 }
 
