@@ -8,6 +8,7 @@ import (
 	providers "github.com/facilittei/ecomm/internal/providers/juno"
 	authRepository "github.com/facilittei/ecomm/internal/repositories/auth"
 	chargeRepository "github.com/facilittei/ecomm/internal/repositories/charge"
+	"github.com/google/uuid"
 )
 
 // Juno handles payment transaction requests
@@ -36,6 +37,25 @@ func NewJuno(
 // Charge customer using Juno payment provider
 func (j *Juno) Charge(req payment.Request) (map[string]string, error) {
 	ctx := context.Background()
+
+	err := j.chargeRepository.Store(ctx, payment.Charge{
+		ID:          uuid.New(),
+		SKU:         "abcd123",
+		Amount:      req.Amount,
+		Description: req.Description,
+		Customer:    req.Customer,
+		History: []payment.ChargeHistory{
+			{Status: "STARTED", Description: "Transaction has started"},
+		},
+	})
+	if err != nil {
+		j.logger.Error("could not store charge transaction start: %v", err)
+		return map[string]string{
+			"status":  "failed",
+			"message": "could not store charge transaction start",
+		}, err
+	}
+
 	token, err := j.authRepository.Get(ctx)
 	if err != nil {
 		auth, err := j.junoProvider.Authenticate()
